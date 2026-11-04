@@ -1,4 +1,4 @@
-package com.wylew.sakuralivewallpaper
+package com.wylew.snowlivewallpaper
 
 import org.junit.Test
 

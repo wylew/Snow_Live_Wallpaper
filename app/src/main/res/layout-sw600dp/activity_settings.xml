@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/sakura_pink_light">
+    android:background="@color/snow_surface">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/sakura_pink_light"
+        android:background="@color/snow_surface"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -17,7 +17,7 @@
             android:layout_height="?attr/actionBarSize"
             app:title="@string/app_name"
             app:titleCentered="true"
-            app:titleTextColor="@color/sakura_text_dark" />
+            app:titleTextColor="@color/snow_text_dark" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -57,72 +57,72 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/pref_petal_count"
+                            android:text="@string/pref_flake_count"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
-                            android:id="@+id/slider_petal_count"
+                            android:id="@+id/slider_flake_count"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/pref_petal_size"
+                            android:text="@string/pref_flake_size"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
-                            android:id="@+id/slider_petal_size"
+                            android:id="@+id/slider_flake_size"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/pref_petal_color"
+                            android:text="@string/pref_flake_color"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
-                            android:id="@+id/slider_petal_color"
+                            android:id="@+id/slider_flake_color"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Swirl Speed"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_turbulence_speed"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/pref_transparency"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_transparency"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
                     </LinearLayout>
 
                     <!-- Column 2 -->
@@ -138,7 +138,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/pref_wind_strength"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_wind_strength"
                             android:layout_width="match_parent"
@@ -146,50 +146,50 @@
                             android:layout_marginBottom="16dp"
                             android:stepSize="0.05"
                             app:tickVisible="true"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/pref_fall_speed"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_fall_speed"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/pref_rotation_speed"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_rotation_speed"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Swirl Radius"
                             android:textSize="16sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_turbulence_radius"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="16dp"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_reset_defaults"
@@ -199,11 +199,38 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginTop="8dp"
                             android:text="Reset Defaults"
-                            android:textColor="@color/sakura_text_dark"
-                            app:backgroundTint="@color/sakura_pink_medium"
+                            android:textColor="@color/snow_text_dark"
+                            app:backgroundTint="@color/snow_blue_light"
                             app:icon="@android:drawable/ic_menu_preferences" />
                     </LinearLayout>
                 </GridLayout>
+
+                <!-- Snowflake Styles (chips are added in SettingsActivity.setupDesignChips) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pref_flake_designs"
+                    android:textSize="16sp"
+                    android:textColor="@color/snow_text_dark" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/pref_flake_designs_hint"
+                    android:textSize="13sp"
+                    android:textColor="@color/snow_text_dark"
+                    android:alpha="0.7" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_designs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:chipSpacingHorizontal="8dp"
+                    app:selectionRequired="true"
+                    app:singleSelection="false" />
 
                 <com.google.android.material.divider.MaterialDivider
                     android:layout_width="match_parent"
@@ -217,8 +244,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/pref_collect_at_bottom"
                     android:textSize="16sp"
-                    android:textColor="@color/sakura_text_dark"
-                    app:buttonTint="@color/sakura_pink_dark" />
+                    android:textColor="@color/snow_text_dark"
+                    app:buttonTint="@color/snow_blue" />
 
                 <GridLayout
                     android:layout_width="match_parent"
@@ -238,13 +265,13 @@
                             android:layout_height="wrap_content"
                             android:text="Settle Probability"
                             android:textSize="14sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_settle_probability"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -259,13 +286,13 @@
                             android:layout_height="wrap_content"
                             android:text="Settle Height"
                             android:textSize="14sp"
-                            android:textColor="@color/sakura_text_dark" />
+                            android:textColor="@color/snow_text_dark" />
                         <com.google.android.material.slider.Slider
                             android:id="@+id/slider_settle_height"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:thumbColor="@color/sakura_pink_dark"
-                            app:trackColorActive="@color/sakura_pink_dark" />
+                            app:thumbColor="@color/snow_blue"
+                            app:trackColorActive="@color/snow_blue" />
                     </LinearLayout>
                 </GridLayout>
 
@@ -277,11 +304,12 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="24dp"
                     android:text="Set Wallpaper"
-                    android:textColor="@color/sakura_text_dark"
+                    android:textColor="@color/snow_white"
                     android:textSize="16sp"
-                    app:backgroundTint="@color/sakura_green"
+                    app:backgroundTint="@color/snow_accent"
                     app:cornerRadius="16dp"
-                    app:icon="@android:drawable/ic_menu_set_as" />
+                    app:icon="@android:drawable/ic_menu_set_as"
+                    app:iconTint="@color/snow_white" />
 
             </LinearLayout>
 
@@ -305,7 +333,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <com.wylew.sakuralivewallpaper.WallpaperPreviewView
+                    <com.wylew.snowlivewallpaper.WallpaperPreviewView
                         android:id="@+id/wallpaper_preview"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -319,11 +347,12 @@
                         android:layout_gravity="top|end"
                         android:layout_margin="16dp"
                         android:text="@string/pref_background_image"
-                        android:textColor="@color/sakura_text_dark"
+                        android:textColor="@color/snow_text_dark"
                         android:textSize="14sp"
-                        app:backgroundTint="#CCFFB6C1"
+                        app:backgroundTint="@color/snow_blue_light_translucent"
                         app:cornerRadius="16dp"
-                        app:icon="@android:drawable/ic_menu_gallery" />
+                        app:icon="@android:drawable/ic_menu_gallery"
+                        app:iconTint="@color/snow_text_dark" />
                 </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>

@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "com.wylew.sakuralivewallpaper"
+    namespace = "com.wylew.snowlivewallpaper"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.wylew.sakuralivewallpaper"
+        applicationId = "com.wylew.snowlivewallpaper"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

@@ -1,4 +1,4 @@
-package com.wylew.sakuralivewallpaper
+package com.wylew.snowlivewallpaper
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
@@ -20,18 +20,21 @@ import androidx.core.net.toUri
 import kotlin.math.sqrt
 import kotlin.random.Random
 
-class SakuraWallpaperService : WallpaperService() {
+class SnowWallpaperService : WallpaperService() {
 
     override fun onCreateEngine(): Engine {
-        return SakuraEngine()
+        return SnowEngine()
     }
 
-    inner class SakuraEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
-        private val tag = "SakuraWallpaper"
+    inner class SnowEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
+        private val tag = "SnowWallpaper"
         
         private var renderThread: RenderThread? = null
-        private val activePetals = mutableListOf<Petal>()
-        private val groundedPetals = mutableListOf<Petal>()
+        private val activeFlakes = mutableListOf<Snowflake>()
+        private val groundedFlakes = mutableListOf<Snowflake>()
+        // Flakes blown off the pile by a shake. Kept separate so they never count toward the
+        // falling-flake limit (which used to starve the top of new flakes after a shake).
+        private val blowingFlakes = mutableListOf<Snowflake>()
         
         private var backgroundBitmap: Bitmap? = null
         private var scaledBackground: Bitmap? = null
@@ -39,7 +42,7 @@ class SakuraWallpaperService : WallpaperService() {
         private var groundedLayerCanvas: Canvas? = null
         
         private val prefs: SharedPreferences by lazy {
-            getSharedPreferences("sakura_prefs", MODE_PRIVATE)
+            getSharedPreferences("snow_prefs", MODE_PRIVATE)
         }
 
         private var sensorManager: SensorManager? = null
@@ -68,6 +71,7 @@ class SakuraWallpaperService : WallpaperService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
+            loadBackground()
             loadSettings()
         }
 
@@ -101,73 +105,84 @@ class SakuraWallpaperService : WallpaperService() {
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+            // Only re-decode the background image when it actually changed, not on every slider tick.
+            if (key == "background_uri") loadBackground()
             loadSettings()
         }
 
-        private fun loadSettings() {
+        private fun loadBackground() {
+            val width = surfaceHolder.surfaceFrame.width()
+            val height = surfaceHolder.surfaceFrame.height()
             val bgUriStr = prefs.getString("background_uri", null)
-            bgUriStr?.let {
-                try {
-                    val uri = it.toUri()
-                    contentResolver.openInputStream(uri)?.use { stream ->
-                        backgroundBitmap = BitmapFactory.decodeStream(stream)
-                        updateScaledBackground()
-                    }
-                } catch (_: Exception) {
-                    backgroundBitmap = null
-                    scaledBackground = null
+            if (bgUriStr == null || width <= 0 || height <= 0) {
+                backgroundBitmap = null
+                scaledBackground = null
+                return
+            }
+            try {
+                val uri = bgUriStr.toUri()
+                // Read dimensions first so large photos are subsampled instead of decoded at full size.
+                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+                var sample = 1
+                while (bounds.outWidth / (sample * 2) >= width && bounds.outHeight / (sample * 2) >= height) {
+                    sample *= 2
                 }
-            } ?: run { 
+                val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+                contentResolver.openInputStream(uri)?.use { stream ->
+                    backgroundBitmap = BitmapFactory.decodeStream(stream, null, opts)
+                    updateScaledBackground()
+                }
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to load background", e)
                 backgroundBitmap = null
                 scaledBackground = null
             }
+        }
 
+        private fun loadSettings() {
+            Snowflake.loadEnabledDesigns(prefs)
             val width = surfaceHolder.surfaceFrame.width()
             val height = surfaceHolder.surfaceFrame.height()
             
             if (width > 0 && height > 0) {
-                val targetCount = prefs.getInt("petal_count", WallpaperConfig.PETAL_COUNT_DEFAULT)
+                val targetCount = prefs.getInt("flake_count", WallpaperConfig.FLAKE_COUNT_DEFAULT)
                 val wind = prefs.getFloat("wind_strength", WallpaperConfig.WIND_STRENGTH_DEFAULT)
-                val size = prefs.getFloat("petal_size", WallpaperConfig.PETAL_SIZE_DEFAULT)
+                val size = prefs.getFloat("flake_size", WallpaperConfig.FLAKE_SIZE_DEFAULT)
                 val speed = prefs.getFloat("fall_speed", WallpaperConfig.FALL_SPEED_DEFAULT)
                 val rotSpeed = prefs.getFloat("rotation_speed", WallpaperConfig.ROTATION_SPEED_DEFAULT)
-                val color = prefs.getInt("petal_color", WallpaperConfig.COLOR_START)
-                val alpha = prefs.getInt("petal_alpha", WallpaperConfig.ALPHA_DEFAULT)
-                val collect = prefs.getBoolean("collect_at_bottom", false)
+                val color = prefs.getInt("flake_color", WallpaperConfig.COLOR_DEFAULT)
+                val alpha = prefs.getInt("flake_alpha", WallpaperConfig.ALPHA_DEFAULT)
+                val collect = prefs.getBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT)
+                val pileHeight = prefs.getFloat("max_pile_height", WallpaperConfig.PILE_HEIGHT_DEFAULT)
                 
                 // New turbulence settings
                 val turbSpeed = prefs.getFloat("turbulence_speed", WallpaperConfig.TURBULENCE_SPEED_DEFAULT)
                 val turbRadius = prefs.getFloat("turbulence_radius", WallpaperConfig.TURBULENCE_RADIUS_DEFAULT)
 
-                val oldWidth = activePetals.firstOrNull()?.screenWidth ?: 0
-                val oldHeight = activePetals.firstOrNull()?.screenHeight ?: 0
+                val oldWidth = activeFlakes.firstOrNull()?.screenWidth ?: 0
+                val oldHeight = activeFlakes.firstOrNull()?.screenHeight ?: 0
                 val isRotation = (width != oldWidth || height != oldHeight) && oldWidth > 0
 
-                if (!collect) {
-                    groundedPetals.clear()
-                    groundedLayerBitmap?.eraseColor(Color.TRANSPARENT)
-                }
+                synchronized(activeFlakes) {
+                    if (!collect) {
+                        groundedFlakes.clear()
+                        groundedLayerBitmap?.eraseColor(Color.TRANSPARENT)
+                    }
 
-                synchronized(activePetals) {
-                    if (isRotation) {
-                        activePetals.clear()
-                        val prepopulateCount = (targetCount * 0.8f).toInt()
-                        repeat(prepopulateCount) {
-                            val p = createNewPetal(width, height)
-                            p.reset(fullRandomY = true)
-                            activePetals.add(p)
-                        }
-                    } else {
-                        if (activePetals.size < targetCount) {
-                            repeat(targetCount - activePetals.size) {
-                                val p = createNewPetal(width, height)
-                                p.reset(fullRandomY = true)
-                                activePetals.add(p)
-                            }
+                    // Fill the whole screen on first start and on rotation/fold. Other count increases are
+                    // handled by the render loop, which trickles new flakes in from above.
+                    if (isRotation || activeFlakes.isEmpty()) {
+                        activeFlakes.clear()
+                        blowingFlakes.clear()
+                        repeat(targetCount) {
+                            val p = createNewFlake(width, height)
+                            p.reset(Snowflake.Spawn.ANYWHERE)
+                            activeFlakes.add(p)
                         }
                     }
 
-                    activePetals.forEach { 
+                    activeFlakes.forEach { 
                         it.updateSettings(
                             screenWidth = width, 
                             screenHeight = height, 
@@ -182,7 +197,7 @@ class SakuraWallpaperService : WallpaperService() {
                             turbulenceRadius = turbRadius
                         ) 
                     }
-                    groundedPetals.forEach { 
+                    groundedFlakes.forEach { 
                         it.updateSettings(
                             screenWidth = width, 
                             screenHeight = height, 
@@ -194,7 +209,8 @@ class SakuraWallpaperService : WallpaperService() {
                             collectAtBottom = collect, 
                             rotationSpeed = rotSpeed, 
                             turbulenceSpeed = turbSpeed, 
-                            turbulenceRadius = turbRadius
+                            turbulenceRadius = turbRadius,
+                            pileHeight = pileHeight
                         ) 
                     }
                 }
@@ -255,10 +271,12 @@ class SakuraWallpaperService : WallpaperService() {
             val height = surfaceHolder.surfaceFrame.height()
             if (width <= 0 || height <= 0) return
 
-            ensureGroundedLayer(width, height)
-            groundedLayerBitmap?.eraseColor(Color.TRANSPARENT)
-            synchronized(activePetals) {
-                groundedPetals.forEach { p ->
+            // Hold the lock for the whole rebuild: the render thread draws this bitmap,
+            // and ensureGroundedLayer may recycle it.
+            synchronized(activeFlakes) {
+                ensureGroundedLayer(width, height)
+                groundedLayerBitmap?.eraseColor(Color.TRANSPARENT)
+                groundedFlakes.forEach { p ->
                     groundedLayerCanvas?.let { p.draw(it) }
                 }
             }
@@ -278,16 +296,16 @@ class SakuraWallpaperService : WallpaperService() {
             }
         }
 
-        private fun createNewPetal(width: Int, height: Int): Petal {
-            return Petal(
+        private fun createNewFlake(width: Int, height: Int): Snowflake {
+            return Snowflake(
                 screenWidth = width,
                 screenHeight = height,
                 windStrength = prefs.getFloat("wind_strength", WallpaperConfig.WIND_STRENGTH_DEFAULT),
-                size = prefs.getFloat("petal_size", WallpaperConfig.PETAL_SIZE_DEFAULT),
+                size = prefs.getFloat("flake_size", WallpaperConfig.FLAKE_SIZE_DEFAULT),
                 speed = prefs.getFloat("fall_speed", WallpaperConfig.FALL_SPEED_DEFAULT),
-                color = prefs.getInt("petal_color", WallpaperConfig.COLOR_START),
-                alpha = prefs.getInt("petal_alpha", WallpaperConfig.ALPHA_DEFAULT),
-                collectAtBottom = prefs.getBoolean("collect_at_bottom", false),
+                color = prefs.getInt("flake_color", WallpaperConfig.COLOR_DEFAULT),
+                alpha = prefs.getInt("flake_alpha", WallpaperConfig.ALPHA_DEFAULT),
+                collectAtBottom = prefs.getBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT),
                 rotationSpeed = prefs.getFloat("rotation_speed", WallpaperConfig.ROTATION_SPEED_DEFAULT),
                 turbulenceSpeed = prefs.getFloat("turbulence_speed", WallpaperConfig.TURBULENCE_SPEED_DEFAULT),
                 turbulenceRadius = prefs.getFloat("turbulence_radius", WallpaperConfig.TURBULENCE_RADIUS_DEFAULT)
@@ -302,13 +320,13 @@ class SakuraWallpaperService : WallpaperService() {
                 val gForce = sqrt(x*x + y*y + z*z) / SensorManager.GRAVITY_EARTH
                 
                 if (gForce > (WallpaperConfig.SHAKE_THRESHOLD / 9.81f) + 1.0f) {
-                    synchronized(activePetals) {
-                        if (groundedPetals.isNotEmpty()) {
-                            groundedPetals.forEach { 
+                    synchronized(activeFlakes) {
+                        if (groundedFlakes.isNotEmpty()) {
+                            groundedFlakes.forEach { 
                                 it.blowAway()
-                                activePetals.add(it)
+                                blowingFlakes.add(it)
                             }
-                            groundedPetals.clear()
+                            groundedFlakes.clear()
                             groundedLayerBitmap?.eraseColor(Color.TRANSPARENT)
                         }
                     }
@@ -325,7 +343,7 @@ class SakuraWallpaperService : WallpaperService() {
             stopRenderThread()
         }
 
-        private inner class RenderThread : Thread("SakuraRenderThread") {
+        private inner class RenderThread : Thread("SnowRenderThread") {
             var running = true
             private var lastFrameNanoTime = 0L
 
@@ -375,51 +393,75 @@ class SakuraWallpaperService : WallpaperService() {
                             canvas.drawBitmap(it, 0f, 0f, null)
                         } ?: canvas.drawColor(Color.BLACK)
                         
-                        // Draw grounded layer
-                        groundedLayerBitmap?.let { canvas.drawBitmap(it, 0f, 0f, null) }
-
-                        val collect = prefs.getBoolean("collect_at_bottom", false)
+                        val collect = prefs.getBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT)
                         val settleProb = prefs.getFloat("settle_probability", WallpaperConfig.SETTLE_PROBABILITY_DEFAULT)
                         val pileHeightPercent = prefs.getFloat("max_pile_height", WallpaperConfig.PILE_HEIGHT_DEFAULT)
                         
-                        val targetCount = prefs.getInt("petal_count", WallpaperConfig.PETAL_COUNT_DEFAULT)
+                        val targetCount = prefs.getInt("flake_count", WallpaperConfig.FLAKE_COUNT_DEFAULT)
                         val maxCount = if (powerManager.isPowerSaveMode) (targetCount * 0.5f).toInt() else targetCount
 
-                        synchronized(activePetals) {
-                            val activeIterator = activePetals.iterator()
+                        synchronized(activeFlakes) {
+                            // Draw grounded layer (inside the lock so it can't be recycled mid-draw)
+                            groundedLayerBitmap?.let { canvas.drawBitmap(it, 0f, 0f, null) }
+
+                            val h = canvas.height
+                            val w = canvas.width
+                            val settleAreaHeight = h * pileHeightPercent
+                            var settledThisFrame = 0
+
+                            val activeIterator = activeFlakes.iterator()
                             while (activeIterator.hasNext()) {
                                 val p = activeIterator.next()
+                                val prevY = p.y
                                 p.update(deltaTime)
+
+                                // Settle in place the moment a flake crosses its own landing line inside the
+                                // settle area (one roll per crossing), instead of teleporting it there.
+                                if (collect && groundedFlakes.size < WallpaperConfig.MAX_GROUNDED_FLAKES) {
+                                    val landingY = h - p.landingRoll * settleAreaHeight
+                                    if (prevY < landingY && p.y >= landingY && Random.nextFloat() < settleProb) {
+                                        p.settle()
+                                        groundedFlakes.add(p)
+                                        groundedLayerCanvas?.let { p.draw(it) }
+                                        p.draw(canvas) // grounded layer was already drawn this frame
+                                        activeIterator.remove()
+                                        settledThisFrame++
+                                        continue
+                                    }
+                                }
+
                                 p.draw(canvas)
 
-                                val isOffBottom = p.y > canvas.height - p.size
-                                val isBlowingOffScreen = p.isBlowingAway && (p.y < -p.size * 10 || p.x < -p.size * 10 || p.x > canvas.width + p.size * 10)
-
-                                if (isOffBottom || isBlowingOffScreen) {
-                                    if (isOffBottom && !p.isBlowingAway && collect && groundedPetals.size < WallpaperConfig.MAX_GROUNDED_PETALS) {
-                                        if (Random.nextFloat() < settleProb) {
-                                            val maxPileY = canvas.height * (1f - pileHeightPercent)
-                                            p.y = canvas.height - (Random.nextFloat() * (canvas.height - maxPileY))
-                                            p.settle()
-                                            groundedPetals.add(p)
-                                            groundedLayerCanvas?.let { p.draw(it) }
-                                            activeIterator.remove()
-                                            continue
-                                        }
-                                    }
-
-                                    if (activePetals.size > maxCount) {
+                                // Only recycle once the flake is completely below the screen.
+                                if (p.y > h + p.extent) {
+                                    if (activeFlakes.size > maxCount) {
                                         activeIterator.remove()
                                     } else {
-                                        p.reset()
+                                        p.reset(Snowflake.Spawn.TOP)
                                     }
                                 }
                             }
 
-                            while (activePetals.size < maxCount) {
-                                val p = createNewPetal(canvas.width, canvas.height)
-                                p.reset()
-                                activePetals.add(p)
+                            // Replace settled flakes right away at the top so the stream doesn't thin out.
+                            repeat(settledThisFrame) {
+                                if (activeFlakes.size < maxCount) {
+                                    activeFlakes.add(createNewFlake(w, h).apply { reset(Snowflake.Spawn.TOP) })
+                                }
+                            }
+                            // Any other shortfall (count slider raised, leaving battery saver) trickles in from above.
+                            while (activeFlakes.size < maxCount) {
+                                activeFlakes.add(createNewFlake(w, h).apply { reset(Snowflake.Spawn.ABOVE) })
+                            }
+
+                            val blowingIterator = blowingFlakes.iterator()
+                            while (blowingIterator.hasNext()) {
+                                val p = blowingIterator.next()
+                                p.update(deltaTime)
+                                p.draw(canvas)
+                                // Gravity brings them back down, so only drop them once fully off the bottom or sides.
+                                if (p.y > h + p.extent || p.x < -p.extent || p.x > w + p.extent) {
+                                    blowingIterator.remove()
+                                }
                             }
                         }
                     }

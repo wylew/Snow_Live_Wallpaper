@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Snowflake mark. Generated alongside the legacy launcher PNG/WebP icons so they match. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <path
+        android:pathData="M32,32L32,5M32,12.5L25,6.5M32,12.5L39,6.5M32,21L25.5,15.5M32,21L38.5,15.5M32,32L55.38,18.5M48.89,22.25L50.58,13.19M48.89,22.25L57.58,25.31M41.53,26.5L43.04,18.12M41.53,26.5L49.54,29.38M32,32L55.38,45.5M48.89,41.75L57.58,38.69M48.89,41.75L50.58,50.81M41.53,37.5L49.54,34.62M41.53,37.5L43.04,45.88M32,32L32,59M32,51.5L39,57.5M32,51.5L25,57.5M32,43L38.5,48.5M32,43L25.5,48.5M32,32L8.62,45.5M15.11,41.75L13.42,50.81M15.11,41.75L6.42,38.69M22.47,37.5L20.96,45.88M22.47,37.5L14.46,34.62M32,32L8.62,18.5M15.11,22.25L6.42,25.31M15.11,22.25L13.42,13.19M22.47,26.5L14.46,29.38M22.47,26.5L20.96,18.12"
+        android:strokeColor="#2B5A94"
+        android:strokeWidth="4.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M32,26L37.2,29L37.2,35L32,38L26.8,35L26.8,29Z"
+        android:fillColor="#2B5A94"
+        android:strokeColor="#2B5A94"
+        android:strokeWidth="4.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M32,32L32,5M32,12.5L25,6.5M32,12.5L39,6.5M32,21L25.5,15.5M32,21L38.5,15.5M32,32L55.38,18.5M48.89,22.25L50.58,13.19M48.89,22.25L57.58,25.31M41.53,26.5L43.04,18.12M41.53,26.5L49.54,29.38M32,32L55.38,45.5M48.89,41.75L57.58,38.69M48.89,41.75L50.58,50.81M41.53,37.5L49.54,34.62M41.53,37.5L43.04,45.88M32,32L32,59M32,51.5L39,57.5M32,51.5L25,57.5M32,43L38.5,48.5M32,43L25.5,48.5M32,32L8.62,45.5M15.11,41.75L13.42,50.81M15.11,41.75L6.42,38.69M22.47,37.5L20.96,45.88M22.47,37.5L14.46,34.62M32,32L8.62,18.5M15.11,22.25L6.42,25.31M15.11,22.25L13.42,13.19M22.47,26.5L14.46,29.38M22.47,26.5L20.96,18.12"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M32,26L37.2,29L37.2,35L32,38L26.8,35L26.8,29Z"
+        android:fillColor="#E3F0FC"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M32,25L32,8M38.06,28.5L52.78,20M38.06,35.5L52.78,44M32,39L32,56M25.94,35.5L11.22,44M25.94,28.5L11.22,20"
+        android:strokeColor="#A9CFF2"
+        android:strokeWidth="0.9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

@@ -4,11 +4,11 @@
       Standard Android Adaptive Icon (108dp x 108dp)
       Original "Safe Area" was 72dp.
       Reducing size by another 25% (72dp * 0.75 = 54dp).
-      This ensures the flower is comfortably centered and well within all potential
+      This ensures the snowflake is comfortably centered and well within all potential
       system masks (circular, square, squircle) used by different launchers and system settings.
     -->
     <item
-        android:drawable="@drawable/sakura"
+        android:drawable="@drawable/snowflake"
         android:gravity="center"
         android:width="54dp"
         android:height="54dp" />

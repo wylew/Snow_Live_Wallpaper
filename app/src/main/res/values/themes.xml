@@ -1,33 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme using Material 3. -->
-    <style name="Theme.SakuraLiveWallpaper" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.SnowLiveWallpaper" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/sakura_pink_dark</item>
-        <item name="colorOnPrimary">@color/sakura_white</item>
-        <item name="colorPrimaryContainer">@color/sakura_pink_medium</item>
-        <item name="colorOnPrimaryContainer">@color/sakura_text_dark</item>
+        <item name="colorPrimary">@color/snow_blue</item>
+        <item name="colorOnPrimary">@color/snow_white</item>
+        <item name="colorPrimaryContainer">@color/snow_blue_light</item>
+        <item name="colorOnPrimaryContainer">@color/snow_text_dark</item>
 
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/sakura_green</item>
-        <item name="colorOnSecondary">@color/sakura_white</item>
-        <item name="colorSecondaryContainer">@color/sakura_green</item>
-        <item name="colorOnSecondaryContainer">@color/sakura_white</item>
+        <item name="colorSecondary">@color/snow_accent</item>
+        <item name="colorOnSecondary">@color/snow_white</item>
+        <item name="colorSecondaryContainer">@color/snow_accent</item>
+        <item name="colorOnSecondaryContainer">@color/snow_white</item>
 
         <!-- Background colors -->
-        <item name="android:windowBackground">@color/sakura_pink_light</item>
-        <item name="colorSurface">@color/sakura_pink_light</item>
-        <item name="colorOnSurface">@color/sakura_text_dark</item>
-        <item name="colorSurfaceVariant">@color/sakura_pink_medium</item>
-        <item name="colorOnSurfaceVariant">@color/sakura_text_dark</item>
+        <item name="android:windowBackground">@color/snow_surface</item>
+        <item name="colorSurface">@color/snow_surface</item>
+        <item name="colorOnSurface">@color/snow_text_dark</item>
+        <item name="colorSurfaceVariant">@color/snow_blue_light</item>
+        <item name="colorOnSurfaceVariant">@color/snow_text_dark</item>
+
+        <!-- Outlines / dividers (Material 3 defaults are purple-tinted). -->
+        <item name="colorOutline">@color/snow_blue</item>
+        <item name="colorOutlineVariant">@color/snow_blue_light</item>
 
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/sakura_pink_light</item>
+        <item name="android:statusBarColor">@color/snow_surface</item>
         <item name="android:windowLightStatusBar">true</item>
 
         <!-- Fix for Tonal Buttons on some devices -->
-        <item name="colorTertiary">@color/sakura_pink_medium</item>
-        <item name="colorOnTertiary">@color/sakura_text_dark</item>
-        <item name="colorTertiaryContainer">@color/sakura_pink_light</item>
-        <item name="colorOnTertiaryContainer">@color/sakura_text_dark</item>
+        <item name="colorTertiary">@color/snow_blue_light</item>
+        <item name="colorOnTertiary">@color/snow_text_dark</item>
+        <item name="colorTertiaryContainer">@color/snow_surface</item>
+        <item name="colorOnTertiaryContainer">@color/snow_text_dark</item>
     </style>
 </resources>

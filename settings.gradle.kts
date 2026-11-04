@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sakura Live Wallpaper"
+rootProject.name = "Snow Live Wallpaper"
 include(":app")
  

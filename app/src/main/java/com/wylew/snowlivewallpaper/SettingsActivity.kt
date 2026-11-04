@@ -1,26 +1,38 @@
-package com.wylew.sakuralivewallpaper
+package com.wylew.snowlivewallpaper
 
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipDrawable
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.slider.Slider
 import kotlin.math.roundToInt
 
 class SettingsActivity : AppCompatActivity() {
 
-    private val prefs by lazy { getSharedPreferences("sakura_prefs", MODE_PRIVATE) }
+    private val prefs by lazy { getSharedPreferences("snow_prefs", MODE_PRIVATE) }
     private lateinit var previewView: WallpaperPreviewView
 
-    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    // OpenDocument (not GetContent) so the URI supports a persistable read grant; the wallpaper
+    // service needs to re-open it after process restarts. GetContent URIs often throw here.
+    private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let {
-            contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            try {
+                contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (_: SecurityException) {
+                // Provider doesn't offer persistable grants; still usable for this session.
+            }
             prefs.edit().putString("background_uri", it.toString()).apply()
         }
     }
@@ -34,16 +46,82 @@ class SettingsActivity : AppCompatActivity() {
         setupSliders()
         setupButtons()
         setupCheckbox()
+        setupDesignChips()
         updateSettleSettingsState(prefs.getBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT))
     }
 
+    // Suppresses pref writes while chip states are being set from code.
+    private var syncingDesignChips = false
+
+    private fun setupDesignChips() {
+        val group = findViewById<ChipGroup>(R.id.chip_group_designs) ?: return
+        val names = resources.getStringArray(R.array.flake_design_names)
+        val density = resources.displayMetrics.density
+        val accent = ContextCompat.getColor(this, R.color.snow_accent)
+        val textColor = ContextCompat.getColor(this, R.color.snow_text_dark)
+        val checkedStates = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
+        val background = ColorStateList(
+            checkedStates,
+            intArrayOf(ContextCompat.getColor(this, R.color.snow_blue_light), Color.TRANSPARENT)
+        )
+        val stroke = ColorStateList(
+            checkedStates,
+            intArrayOf(accent, ContextCompat.getColor(this, R.color.snow_blue_light))
+        )
+
+        group.removeAllViews()
+        for (design in 0 until Snowflake.DESIGN_COUNT) {
+            val chip = Chip(this).apply {
+                id = View.generateViewId()
+                tag = design
+                setChipDrawable(
+                    ChipDrawable.createFromAttributes(
+                        this@SettingsActivity, null, 0,
+                        com.google.android.material.R.style.Widget_Material3_Chip_Filter
+                    )
+                )
+                text = names.getOrElse(design) { "Style ${design + 1}" }
+                setTextColor(textColor)
+                isCheckable = true
+                isCheckedIconVisible = false // the highlighted background shows selection
+                chipIcon = BitmapDrawable(resources, Snowflake.renderDesign(design, 10f * density, accent))
+                isChipIconVisible = true
+                chipIconSize = 24f * density
+                chipBackgroundColor = background
+                chipStrokeColor = stroke
+                chipStrokeWidth = 1f * density
+            }
+            group.addView(chip)
+        }
+
+        group.setOnCheckedStateChangeListener { g, checkedIds ->
+            if (syncingDesignChips) return@setOnCheckedStateChangeListener
+            val selected = checkedIds.mapNotNull { g.findViewById<Chip>(it)?.tag?.toString() }.toSet()
+            if (selected.isNotEmpty()) {
+                prefs.edit().putStringSet(Snowflake.PREF_DESIGNS, selected).apply()
+            }
+        }
+        syncDesignChips()
+    }
+
+    private fun syncDesignChips() {
+        val group = findViewById<ChipGroup>(R.id.chip_group_designs) ?: return
+        val saved = prefs.getStringSet(Snowflake.PREF_DESIGNS, Snowflake.ALL_DESIGNS) ?: Snowflake.ALL_DESIGNS
+        syncingDesignChips = true
+        for (i in 0 until group.childCount) {
+            val chip = group.getChildAt(i) as? Chip ?: continue
+            chip.isChecked = chip.tag.toString() in saved
+        }
+        syncingDesignChips = false
+    }
+
     private fun setupSliders() {
-        findViewById<Slider>(R.id.slider_petal_count)?.apply {
-            valueFrom = WallpaperConfig.PETAL_COUNT_MIN.toFloat()
-            valueTo = WallpaperConfig.PETAL_COUNT_MAX.toFloat()
-            updateValue(this, prefs.getInt("petal_count", WallpaperConfig.PETAL_COUNT_DEFAULT).toFloat())
+        findViewById<Slider>(R.id.slider_flake_count)?.apply {
+            valueFrom = WallpaperConfig.FLAKE_COUNT_MIN.toFloat()
+            valueTo = WallpaperConfig.FLAKE_COUNT_MAX.toFloat()
+            updateValue(this, prefs.getInt("flake_count", WallpaperConfig.FLAKE_COUNT_DEFAULT).toFloat())
             addOnChangeListener { _, value, _ ->
-                prefs.edit().putInt("petal_count", value.toInt()).apply()
+                prefs.edit().putInt("flake_count", value.toInt()).apply()
             }
         }
 
@@ -77,12 +155,12 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Slider>(R.id.slider_petal_size)?.apply {
-            valueFrom = WallpaperConfig.PETAL_SIZE_MIN
-            valueTo = WallpaperConfig.PETAL_SIZE_MAX
-            updateValue(this, prefs.getFloat("petal_size", WallpaperConfig.PETAL_SIZE_DEFAULT))
+        findViewById<Slider>(R.id.slider_flake_size)?.apply {
+            valueFrom = WallpaperConfig.FLAKE_SIZE_MIN
+            valueTo = WallpaperConfig.FLAKE_SIZE_MAX
+            updateValue(this, prefs.getFloat("flake_size", WallpaperConfig.FLAKE_SIZE_DEFAULT))
             addOnChangeListener { _, value, _ ->
-                prefs.edit().putFloat("petal_size", value).apply()
+                prefs.edit().putFloat("flake_size", value).apply()
             }
         }
 
@@ -104,22 +182,22 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Slider>(R.id.slider_petal_color)?.apply {
+        findViewById<Slider>(R.id.slider_flake_color)?.apply {
             valueFrom = 0f
             valueTo = 100f
-            val color = prefs.getInt("petal_color", WallpaperConfig.COLOR_DEFAULT)
+            val color = prefs.getInt("flake_color", WallpaperConfig.COLOR_DEFAULT)
             updateValue(this, calculateColorProgress(color).toFloat())
             addOnChangeListener { _, value, _ ->
-                prefs.edit().putInt("petal_color", interpolateColor(value / 100f)).apply()
+                prefs.edit().putInt("flake_color", interpolateColor(value / 100f)).apply()
             }
         }
 
         findViewById<Slider>(R.id.slider_transparency)?.apply {
             valueFrom = WallpaperConfig.ALPHA_MIN.toFloat()
             valueTo = WallpaperConfig.ALPHA_MAX.toFloat()
-            updateValue(this, prefs.getInt("petal_alpha", WallpaperConfig.ALPHA_DEFAULT).toFloat())
+            updateValue(this, prefs.getInt("flake_alpha", WallpaperConfig.ALPHA_DEFAULT).toFloat())
             addOnChangeListener { _, value, _ ->
-                prefs.edit().putInt("petal_alpha", value.toInt()).apply()
+                prefs.edit().putInt("flake_alpha", value.toInt()).apply()
             }
         }
 
@@ -143,18 +221,20 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateValue(slider: Slider, value: Float) {
+        // setupSliders() runs again on "reset to defaults"; drop old listeners so they don't stack up.
+        slider.clearOnChangeListeners()
         slider.value = value.coerceIn(slider.valueFrom, slider.valueTo)
     }
 
     private fun setupButtons() {
         findViewById<View>(R.id.btn_select_background)?.setOnClickListener {
-            pickImage.launch("image/*")
+            pickImage.launch(arrayOf("image/*"))
         }
 
         findViewById<View>(R.id.btn_set_wallpaper)?.setOnClickListener {
             val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
             intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                ComponentName(this, SakuraWallpaperService::class.java))
+                ComponentName(this, SnowWallpaperService::class.java))
             startActivity(intent)
         }
 
@@ -165,24 +245,26 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun resetToDefaults() {
         prefs.edit().apply {
-            putInt("petal_count", WallpaperConfig.PETAL_COUNT_DEFAULT)
+            putInt("flake_count", WallpaperConfig.FLAKE_COUNT_DEFAULT)
             putFloat("wind_strength", WallpaperConfig.WIND_STRENGTH_DEFAULT)
             putFloat("turbulence_speed", WallpaperConfig.TURBULENCE_SPEED_DEFAULT)
             putFloat("turbulence_radius", WallpaperConfig.TURBULENCE_RADIUS_DEFAULT)
-            putFloat("petal_size", WallpaperConfig.PETAL_SIZE_DEFAULT)
+            putFloat("flake_size", WallpaperConfig.FLAKE_SIZE_DEFAULT)
             putFloat("fall_speed", WallpaperConfig.FALL_SPEED_DEFAULT)
             putFloat("rotation_speed", WallpaperConfig.ROTATION_SPEED_DEFAULT)
-            putInt("petal_color", WallpaperConfig.COLOR_DEFAULT)
-            putInt("petal_alpha", WallpaperConfig.ALPHA_DEFAULT)
+            putInt("flake_color", WallpaperConfig.COLOR_DEFAULT)
+            putInt("flake_alpha", WallpaperConfig.ALPHA_DEFAULT)
             putBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT)
             putFloat("settle_probability", WallpaperConfig.SETTLE_PROBABILITY_DEFAULT)
             putFloat("max_pile_height", WallpaperConfig.PILE_HEIGHT_DEFAULT)
+            putStringSet(Snowflake.PREF_DESIGNS, Snowflake.ALL_DESIGNS)
             apply()
         }
         
         // Refresh UI
         setupSliders()
         setupCheckbox()
+        syncDesignChips()
         updateSettleSettingsState(WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT)
     }
 

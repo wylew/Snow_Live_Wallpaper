@@ -1,12 +1,12 @@
-package com.wylew.sakuralivewallpaper
+package com.wylew.snowlivewallpaper
 
 import android.graphics.Color
 
 object WallpaperConfig {
-    // Petal Count
-    const val PETAL_COUNT_MIN = 50
-    const val PETAL_COUNT_MAX = 500
-    const val PETAL_COUNT_DEFAULT = 246
+    // Snowflake Count
+    const val FLAKE_COUNT_MIN = 50
+    const val FLAKE_COUNT_MAX = 500
+    const val FLAKE_COUNT_DEFAULT = 246
 
     // Wind Strength (Directional: -1.0 Left to 1.0 Right)
     const val WIND_STRENGTH_MIN = -1.0f
@@ -26,10 +26,10 @@ object WallpaperConfig {
     // Wind Turbulence (Legacy - keeping for transition)
     const val WIND_TURBULENCE_DEFAULT = 0.3f
 
-    // Petal Size
-    const val PETAL_SIZE_MIN = 5.0f
-    const val PETAL_SIZE_MAX = 30.0f
-    const val PETAL_SIZE_DEFAULT = 12.0f
+    // Snowflake Size
+    const val FLAKE_SIZE_MIN = 5.0f
+    const val FLAKE_SIZE_MAX = 30.0f
+    const val FLAKE_SIZE_DEFAULT = 12.0f
 
     // Fall Speed
     const val FALL_SPEED_MIN = 0.0f
@@ -48,10 +48,10 @@ object WallpaperConfig {
 
     // Colors
     val COLOR_START = Color.WHITE
-    val COLOR_END = Color.rgb(255, 182, 193) // Light Pink
+    val COLOR_END = Color.rgb(173, 216, 255) // Icy Blue
     
-    // Default color at 30% between Start and End
-    val COLOR_DEFAULT = Color.rgb(255, 233, 236)
+    // Default color: a faint blue tint near white
+    val COLOR_DEFAULT = Color.rgb(239, 247, 255)
 
     // Settle Settings
     const val COLLECT_AT_BOTTOM_DEFAULT = true
@@ -65,6 +65,7 @@ object WallpaperConfig {
     const val PILE_HEIGHT_DEFAULT = 0.10f
 
     // Internal Logic (Not user facing)
+    const val SPAWN_BAND = 0.1f // Recycled flakes re-enter within this fraction of screen height above the top
     const val SHAKE_THRESHOLD = 12.0f // Sensitivity for shake detection
-    const val MAX_GROUNDED_PETALS = 750 // Maximum number of petals that can settle at the bottom
+    const val MAX_GROUNDED_FLAKES = 750 // Maximum number of flakes that can settle at the bottom
 }

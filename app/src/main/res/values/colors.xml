@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Sakura Theme Colors -->
-    <color name="sakura_pink_light">#FFF0F5</color> <!-- Lavender Blush -->
-    <color name="sakura_pink_medium">#FFB6C1</color> <!-- Light Pink -->
-    <color name="sakura_pink_dark">#FF69B4</color> <!-- Hot Pink -->
-    <color name="sakura_green">#8BA36D</color> <!-- Soft Leaf Green -->
-    <color name="sakura_white">#FFFFFF</color>
-    <color name="sakura_text_dark">#4A2C2C</color> <!-- Deep Brownish-Pink for text -->
+    <!-- Snow Theme Colors -->
+    <color name="snow_surface">#F2F8FF</color> <!-- Frosty White -->
+    <color name="snow_blue_light">#BFDDF7</color> <!-- Pale Ice Blue -->
+    <color name="snow_blue_light_translucent">#CCBFDDF7</color> <!-- Pale Ice Blue, 80% (over preview) -->
+    <color name="snow_blue">#3E7CC4</color> <!-- Winter Blue -->
+    <color name="snow_accent">#2A5C99</color> <!-- Deep Glacier Blue -->
+    <color name="snow_white">#FFFFFF</color>
+    <color name="snow_text_dark">#1F3550</color> <!-- Deep Navy for text -->
 
     <!-- Standard Colors -->
     <color name="black">#FF000000</color>

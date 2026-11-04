@@ -1,4 +1,4 @@
-package com.wylew.sakuralivewallpaper
+package com.wylew.snowlivewallpaper
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -8,7 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Rect
-import android.net.Uri
+import androidx.core.net.toUri
 import android.util.AttributeSet
 import android.view.View
 
@@ -16,10 +16,10 @@ class WallpaperPreviewView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private val petals = mutableListOf<Petal>()
+    private val flakes = mutableListOf<Snowflake>()
     private var backgroundBitmap: Bitmap? = null
     private val prefs: SharedPreferences by lazy {
-        context.getSharedPreferences("sakura_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("snow_prefs", Context.MODE_PRIVATE)
     }
     
     private var lastTime = System.currentTimeMillis()
@@ -27,6 +27,7 @@ class WallpaperPreviewView @JvmOverloads constructor(
 
     init {
         prefs.registerOnSharedPreferenceChangeListener(this)
+        loadBackground()
         loadSettings()
     }
 
@@ -35,37 +36,38 @@ class WallpaperPreviewView @JvmOverloads constructor(
         loadSettings()
     }
 
+    private fun loadBackground() {
+        val bgUriStr = prefs.getString("background_uri", null)
+        backgroundBitmap = bgUriStr?.let {
+            try {
+                context.contentResolver.openInputStream(it.toUri())?.use { stream ->
+                    BitmapFactory.decodeStream(stream)
+                }
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
     private fun loadSettings() {
-        val count = prefs.getInt("petal_count", WallpaperConfig.PETAL_COUNT_DEFAULT)
+        Snowflake.loadEnabledDesigns(prefs)
+        val count = prefs.getInt("flake_count", WallpaperConfig.FLAKE_COUNT_DEFAULT)
         val wind = prefs.getFloat("wind_strength", WallpaperConfig.WIND_STRENGTH_DEFAULT)
-        val size = prefs.getFloat("petal_size", WallpaperConfig.PETAL_SIZE_DEFAULT)
+        val size = prefs.getFloat("flake_size", WallpaperConfig.FLAKE_SIZE_DEFAULT)
         val speed = prefs.getFloat("fall_speed", WallpaperConfig.FALL_SPEED_DEFAULT)
         val rotSpeed = prefs.getFloat("rotation_speed", WallpaperConfig.ROTATION_SPEED_DEFAULT)
-        val color = prefs.getInt("petal_color", WallpaperConfig.COLOR_START)
-        val alpha = prefs.getInt("petal_alpha", WallpaperConfig.ALPHA_DEFAULT)
-        val collect = prefs.getBoolean("collect_at_bottom", false)
+        val color = prefs.getInt("flake_color", WallpaperConfig.COLOR_DEFAULT)
+        val alpha = prefs.getInt("flake_alpha", WallpaperConfig.ALPHA_DEFAULT)
+        val collect = prefs.getBoolean("collect_at_bottom", WallpaperConfig.COLLECT_AT_BOTTOM_DEFAULT)
         
         val turbSpeed = prefs.getFloat("turbulence_speed", WallpaperConfig.TURBULENCE_SPEED_DEFAULT)
         val turbRadius = prefs.getFloat("turbulence_radius", WallpaperConfig.TURBULENCE_RADIUS_DEFAULT)
         
-        val bgUriStr = prefs.getString("background_uri", null)
-
-        bgUriStr?.let {
-            try {
-                val uri = Uri.parse(it)
-                context.contentResolver.openInputStream(uri)?.use { stream ->
-                    backgroundBitmap = BitmapFactory.decodeStream(stream)
-                }
-            } catch (e: Exception) {
-                backgroundBitmap = null
-            }
-        } ?: run { backgroundBitmap = null }
-
         if (width > 0 && height > 0) {
-            if (petals.size != count) {
-                petals.clear()
+            if (flakes.size != count) {
+                flakes.clear()
                 repeat(count) {
-                    petals.add(Petal(
+                    flakes.add(Snowflake(
                         screenWidth = width,
                         screenHeight = height,
                         size = size,
@@ -80,7 +82,7 @@ class WallpaperPreviewView @JvmOverloads constructor(
                     ))
                 }
             } else {
-                petals.forEach { 
+                flakes.forEach { 
                     it.updateSettings(width, height, size, wind, speed, color, alpha, collect, rotSpeed, turbSpeed, turbRadius)
                 }
             }
@@ -94,9 +96,9 @@ class WallpaperPreviewView @JvmOverloads constructor(
 
         drawBackground(canvas)
 
-        petals.forEach {
+        flakes.forEach {
             it.update(deltaTime)
-            if (it.y > height + it.size * 4) {
+            if (it.y > height + it.extent) {
                 it.reset()
             }
             it.draw(canvas)
@@ -144,6 +146,7 @@ class WallpaperPreviewView @JvmOverloads constructor(
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == "background_uri") loadBackground()
         loadSettings()
     }
 

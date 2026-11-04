@@ -1,13 +1,23 @@
 <resources>
-    <string name="app_name">Sakura Live Wallpaper</string>
-    <string name="settings_title">Sakura Wallpaper Settings</string>
-    <string name="pref_petal_count">Number of Petals</string>
+    <string name="app_name">Snow Live Wallpaper</string>
+    <string name="settings_title">Snow Wallpaper Settings</string>
+    <string name="pref_flake_count">Number of Snowflakes</string>
     <string name="pref_wind_strength">Wind Strength</string>
-    <string name="pref_petal_size">Petal Size</string>
+    <string name="pref_flake_size">Snowflake Size</string>
     <string name="pref_fall_speed">Fall Speed</string>
     <string name="pref_rotation_speed">Rotation Speed</string>
-    <string name="pref_petal_color">Petal Color</string>
+    <string name="pref_flake_color">Snowflake Color</string>
     <string name="pref_transparency">Transparency</string>
     <string name="pref_background_image">Background Image</string>
-    <string name="pref_collect_at_bottom">Pedals Settle on Screen</string>
+    <string name="pref_collect_at_bottom">Snow Settles on Screen</string>
+    <string name="pref_flake_designs">Snowflake Styles</string>
+    <string name="pref_flake_designs_hint">Falling flakes are picked at random from the styles you select.</string>
+    <!-- Order must match the DESIGN_* ids in Snowflake.kt -->
+    <string-array name="flake_design_names">
+        <item>Classic</item>
+        <item>Fern</item>
+        <item>Plate</item>
+        <item>Starburst</item>
+        <item>Soft Flurry</item>
+    </string-array>
 </resources>

@@ -13,8 +13,9 @@
                 android:endX="108"
                 android:endY="108"
                 android:type="linear">
-                <item android:offset="0" android:color="#FFD1E8" /> <!-- Light Pink -->
-                <item android:offset="1" android:color="#D1E8FF" /> <!-- Light Blue -->
+                <item android:offset="0" android:color="#FFFFFF" /> <!-- Snow White -->
+                <item android:offset="0.45" android:color="#CFE4F8" /> <!-- Frost Blue -->
+                <item android:offset="1" android:color="#5F9BDD" /> <!-- Winter Sky Blue -->
             </gradient>
         </aapt:attr>
     </path>
