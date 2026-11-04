@@ -10,6 +10,10 @@
   <img src="https://img.shields.io/badge/UI-Material%203-5F9BDD" alt="Material 3" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/wylew/Snow_Live_Wallpaper/releases/latest"><img src="https://img.shields.io/github/v/release/wylew/Snow_Live_Wallpaper?label=Download%20APK&color=3E7CC4&logo=android&logoColor=white" alt="Download the latest APK" /></a>
+</p>
+
 A beautiful, highly customizable Android Live Wallpaper that brings the quiet calm of falling snow to your home screen. Designed with modern Android standards and a focus on performance and "Expressive" Material 3 aesthetics.
 
 ## ✨ Features
@@ -71,10 +75,20 @@ This project began as a fork of [Sakura Live Wallpaper](https://github.com/wylew
 
 ## 🚀 Installation
 
+### Download the APK (easiest)
+
+1. Download the latest `SnowLiveWallpaper-*.apk` from the **[Releases page](https://github.com/wylew/Snow_Live_Wallpaper/releases/latest)**.
+2. Open it on your Android device (7.0 or newer). If prompted, allow installs from unknown sources for your browser or file manager.
+3. Open **Snow Live Wallpaper**, adjust your settings, then tap **Set Wallpaper**.
+
+### Build from source
+
 1. Clone this repository.
 2. Open in **Android Studio Hedgehog** or newer.
 3. Build and run the `:app` module on your device or emulator.
 4. Open the app to configure your settings, then tap **Set Wallpaper** to apply.
+
+> Release builds are signed using a git-ignored `keystore.properties` in the project root (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Without it, `assembleRelease` produces an unsigned APK; debug builds work as usual.
 
 ---
 *Created with ❤️ for the Android community.*
