@@ -9,8 +9,8 @@
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
+            <option value="/var/home/wlewin/StudioProjects/Snow_Live_Wallpaper" />
+            <option value="/var/home/wlewin/StudioProjects/Snow_Live_Wallpaper/app" />
           </set>
         </option>
       </GradleProjectSettings>
