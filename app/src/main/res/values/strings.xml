@@ -22,4 +22,7 @@
         <item>Starburst</item>
         <item>Soft Flurry</item>
     </string-array>
+    <string name="fold_warning_title">Your phone is folded</string>
+    <string name="fold_warning_message">On Galaxy Z Fold phones, a live wallpaper set from the cover screen is only applied to the cover screen. To use Snow on both screens, unfold your phone and tap Set Wallpaper from the main screen.</string>
+    <string name="fold_warning_continue">Cover screen only</string>
 </resources>

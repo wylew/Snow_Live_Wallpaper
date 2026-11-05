@@ -3,18 +3,26 @@ package com.wylew.snowlivewallpaper
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.util.Consumer
+import androidx.window.java.layout.WindowInfoTrackerCallbackAdapter
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
+import androidx.window.layout.WindowLayoutInfo
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.slider.Slider
 import kotlin.math.roundToInt
@@ -35,6 +43,22 @@ class SettingsActivity : AppCompatActivity() {
             }
             prefs.edit().putString("background_uri", it.toString()).apply()
         }
+    }
+
+    // Samsung foldables only: One UI picks the target screen from the fold state, which other
+    // vendors' foldables may not do. windowHasFold tracks whether the hinge runs through this
+    // window; on a Galaxy Fold that's only true when unfolded (no FoldingFeature on the cover).
+    private val isFoldable by lazy {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            Build.MANUFACTURER.equals("samsung", ignoreCase = true) &&
+            packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
+    }
+    private var windowHasFold = false
+    private val windowInfoTracker by lazy {
+        WindowInfoTrackerCallbackAdapter(WindowInfoTracker.getOrCreate(this))
+    }
+    private val layoutInfoListener = Consumer<WindowLayoutInfo> { info ->
+        windowHasFold = info.displayFeatures.any { it is FoldingFeature }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -232,15 +256,41 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btn_set_wallpaper)?.setOnClickListener {
-            val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
-            intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                ComponentName(this, SnowWallpaperService::class.java))
-            startActivity(intent)
+            if (isFoldable && !windowHasFold) {
+                // One UI applies a live wallpaper set from the cover screen to the cover screen
+                // only; set from the unfolded main screen it applies to both. Apps can't choose
+                // the target display themselves, so warn before opening the system picker.
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.fold_warning_title)
+                    .setMessage(R.string.fold_warning_message)
+                    .setPositiveButton(R.string.fold_warning_continue) { _, _ -> openLiveWallpaperPicker() }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            } else {
+                openLiveWallpaperPicker()
+            }
         }
 
         findViewById<View>(R.id.btn_reset_defaults)?.setOnClickListener {
             resetToDefaults()
         }
+    }
+
+    private fun openLiveWallpaperPicker() {
+        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER)
+        intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+            ComponentName(this, SnowWallpaperService::class.java))
+        startActivity(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (isFoldable) windowInfoTracker.addWindowLayoutInfoListener(this, ContextCompat.getMainExecutor(this), layoutInfoListener)
+    }
+
+    override fun onStop() {
+        if (isFoldable) windowInfoTracker.removeWindowLayoutInfoListener(layoutInfoListener)
+        super.onStop()
     }
 
     private fun resetToDefaults() {
