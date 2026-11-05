@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The thumbnail must be a plain bitmap (not an adaptive icon): Samsung One UI extracts the
+  system color palette for third-party live wallpapers from this image.
+-->
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:author="@string/wallpaper_author"
+    android:description="@string/wallpaper_description"
     android:settingsActivity="com.wylew.snowlivewallpaper.SettingsActivity"
-    android:thumbnail="@mipmap/ic_launcher" />
+    android:thumbnail="@drawable/wallpaper_thumbnail" />

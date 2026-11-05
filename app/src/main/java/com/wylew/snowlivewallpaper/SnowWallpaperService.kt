@@ -1,5 +1,6 @@
 package com.wylew.snowlivewallpaper
 
+import android.app.WallpaperColors
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -14,6 +15,7 @@ import android.os.PowerManager
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.SurfaceHolder
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
@@ -110,11 +112,73 @@ class SnowWallpaperService : WallpaperService() {
             loadSettings()
         }
 
+        // Colors reported to the system (Material You, One UI palette, launchers). Derived from the
+        // user's background image rather than the app theme; without onComputeColors() the system
+        // falls back to the wallpaper thumbnail, which is the blue/white app icon.
+        @Volatile
+        private var wallpaperColors: WallpaperColors? = null
+        private var colorsSourceUri: String? = null
+        private var colorsComputed = false
+
+        @RequiresApi(Build.VERSION_CODES.O_MR1)
+        override fun onComputeColors(): WallpaperColors? = wallpaperColors
+
+        /**
+         * Extracts a palette from [source] (or from plain black when there's no background image,
+         * matching what's drawn) and tells the system. Skipped if the image hasn't changed, since
+         * this also runs on every rotation / fold.
+         */
+        private fun updateWallpaperColors(sourceUri: String?, source: Bitmap?) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) return
+            if (colorsComputed && sourceUri == colorsSourceUri) return
+            wallpaperColors = try {
+                // fromBitmap downsamples internally, so passing the decoded image is cheap enough.
+                val extracted = WallpaperColors.fromBitmap(source ?: createBitmap(8, 8).apply { eraseColor(Color.BLACK) })
+                preferVividPrimary(extracted)
+            } catch (e: Exception) {
+                Log.e(tag, "Failed to extract wallpaper colors", e)
+                null
+            }
+            colorsSourceUri = sourceUri
+            colorsComputed = true
+            notifyColorsChanged()
+        }
+
+        /**
+         * fromBitmap() ranks colors by how much of the image they cover, so a mostly-shadowed photo
+         * reports near-black as primary. Many launchers (e.g. Niagara) theme from the primary color
+         * alone and end up grey. Put the most colorful of the three first; very dark or washed-out
+         * colors only lead when nothing more colorful exists. Light/dark hints are kept on API 31+.
+         */
+        @RequiresApi(Build.VERSION_CODES.O_MR1)
+        private fun preferVividPrimary(colors: WallpaperColors): WallpaperColors {
+            val candidates = listOfNotNull(colors.primaryColor, colors.secondaryColor, colors.tertiaryColor)
+            fun vividness(c: android.graphics.Color): Float {
+                val hsv = FloatArray(3)
+                Color.colorToHSV(c.toArgb(), hsv)
+                val (_, sat, value) = hsv.toList()
+                return if (value < 0.15f) 0f else sat * value
+            }
+            val ordered = candidates.sortedByDescending { vividness(it) }
+            if (ordered == candidates) return colors
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                WallpaperColors(ordered[0], ordered.getOrNull(1), ordered.getOrNull(2), colors.colorHints)
+            } else {
+                WallpaperColors(ordered[0], ordered.getOrNull(1), ordered.getOrNull(2))
+            }
+        }
+
         private fun loadBackground() {
             val width = surfaceHolder.surfaceFrame.width()
             val height = surfaceHolder.surfaceFrame.height()
             val bgUriStr = prefs.getString("background_uri", null)
-            if (bgUriStr == null || width <= 0 || height <= 0) {
+            if (bgUriStr == null) {
+                backgroundBitmap = null
+                scaledBackground = null
+                updateWallpaperColors(null, null)
+                return
+            }
+            if (width <= 0 || height <= 0) {
                 backgroundBitmap = null
                 scaledBackground = null
                 return
@@ -131,12 +195,15 @@ class SnowWallpaperService : WallpaperService() {
                 val opts = BitmapFactory.Options().apply { inSampleSize = sample }
                 contentResolver.openInputStream(uri)?.use { stream ->
                     backgroundBitmap = BitmapFactory.decodeStream(stream, null, opts)
+                    // Extract before scaling: the scaled copy may be a HARDWARE bitmap, which can't be read.
+                    updateWallpaperColors(bgUriStr, backgroundBitmap)
                     updateScaledBackground()
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Failed to load background", e)
                 backgroundBitmap = null
                 scaledBackground = null
+                updateWallpaperColors(bgUriStr, null)
             }
         }
 

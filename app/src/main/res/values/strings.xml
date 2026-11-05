@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Snow Live Wallpaper</string>
     <string name="settings_title">Snow Wallpaper Settings</string>
+    <string name="wallpaper_author">wylew</string>
+    <string name="wallpaper_description">Gently falling snow over your own background image.</string>
     <string name="pref_flake_count">Number of Snowflakes</string>
     <string name="pref_wind_strength">Wind Strength</string>
     <string name="pref_flake_size">Snowflake Size</string>
